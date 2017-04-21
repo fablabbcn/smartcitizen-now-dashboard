@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css?family=Rubik:300,300i,400,400i,700');
+
+body {
+  color: black;
+  font-weight: bold;
+  background: #39424c;
+  font-family: 'Rubik', sans-serif;
+  color: #EAEAEA;
+}
+
+h1, h3 {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 72px;
+  margin: 20px;
+  font-weight: 700;
+}
+
+h1 {
+  text-transform: uppercase;
+}
+
+h3 {
+  font-weight: 400;
+  font-size: 26px;
+}
+
+
+.devices {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.device {
+  color: white;
+  flex-direction: column;
+  display: flex;
+  margin: 10px;
+  width: 140px; 
+  height: 140px;
+  cursor: pointer;
+  font-weight: 400;
+  border: 5px solid;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.device span {
+  font-size: 14px;
+  font-weight: 300;  
+}
+
+@media (max-width: 410px) {
+  .device {
+    flex-grow: 1;
+    width: 35%;
+    height: 35vw;
+  }
+}
+
+.device:hover {
+  transform: scale(1.1);
+  transition: all .4s ease-in-out;
+  border: 5px solid;
+}
+
+.status {
+  font-size: 14px;
+  margin-top: auto;
+  font-weight: 300;  
+}
+
+@media (max-width: 320px) {
+  .device {
+    font-size: 13px;
+  }
+  .device span {
+    font-size: 12px;
+    font-weight: 300;  
+  }
+  .status {
+    font-size: 12px;
+  }
+}
+
+.offline {
+  border-color: #E74C3C!important;
+  transition: border-color 500ms linear;
+}
+
+.online {
+  border-color: #35E67E!important;
+  transition: border-color 500ms linear;
+}
+
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 5rem;
+  height: 5rem;
+}
+
+.loader .l {
+    display: inline-flex;
+    width: 30%;
+    height: 30%;
+    border-radius: 100%;
+    background-color: white;
+    animation: loader 1.5s infinite ease-in-out both;
+}
+
+.loader .l-1 {
+  animation-delay: -320ms;
+}
+ 
+.loader .l-2 {
+  animation-delay: -160ms;
+}
+ 
+@keyframes loader {
+  0%, 80%, 100% {
+    transform:scale(0)
+  }
+  40% {
+    transform:scale(1);
+  }
+}
