@@ -30,17 +30,17 @@ $(document).ready(function() {
         devices.filter(function(device) {
             return device && device.user_tags && device.user_tags.includes(tag);
         }).sort(function(a, b) {
-            return a.owner_id - b.owner_id;
+            return new Date(b.last_reading_at) - new Date(a.last_reading_at);
         }).forEach(function(device) {
             $('.devices').append(
                 $('<div>', {
                     'class': 'device offline',
                     'data-device': device.id
                 })
-                .data('lastUpdate', device.data[''])
-                .data('batteryStatus', {
-                    last: device.data['10']
-                })
+                .data('lastUpdate', device.last_reading_at)
+                // .data('batteryStatus', {
+                //     last: null,
+                // })
                 .click(function() {
                     window.open('https://smartcitizen.me/kits/' + device.id, '_blank');
                 })
@@ -65,7 +65,7 @@ $(document).ready(function() {
 
                 var isOnline = true;
 
-                if (new Date() - new Date(lastDeviceUpdate) > 1000 * offlineTime) {
+                if (new Date() - new Date(lastDeviceUpdate) > 2000 * offlineTime) {
                     isOnline = false;
                 }
 
