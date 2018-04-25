@@ -9,7 +9,7 @@ $(document).ready(function() {
         'class': 'devices'
     }).html('<div class="loader"><div class = "l l-1"></div><div class="l l-2"></div><div class="l l-3"></div></div>'));
 
-    io.connect('wss://smartcitizen.xyz').on('data-received', function(device) {
+    io.connect('wss://ws.smartcitizen.me').on('data-received', function(device) {
         if (device.data.user_tags.includes(tag)) {
             $('*[data-device="' + device.device_id + '"]')
                 .data('lastUpdate', device.data.last_reading_at)
