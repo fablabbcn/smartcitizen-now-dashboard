@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    var tag = location.hash.substring(1) || 'Plaça del sol',
+    var tag = location.hash.substring(1) || '',
         offlineTime = 120;
 
     document.title = 'Smart Citizen @ ' + tag;
@@ -10,7 +10,7 @@ $(document).ready(function() {
     }).html('<div class="loader"><div class = "l l-1"></div><div class="l l-2"></div><div class="l l-3"></div></div>'));
 
     io.connect('wss://ws.smartcitizen.me').on('data-received', function(device) {
-        if (device.data.user_tags.includes(tag)) {
+        if (tag == '' || device.data.user_tags.includes(tag)) {
             $('*[data-device="' + device.device_id + '"]')
                 .data('lastUpdate', device.data.last_reading_at)
                 .data('batteryStatus', {
@@ -28,6 +28,7 @@ $(document).ready(function() {
         $('.devices').empty();
 
         devices.filter(function(device) {
+            if (tag == '') return true;
             return device && device.user_tags && device.user_tags.includes(tag);
         }).sort(function(a, b) {
             return new Date(b.last_reading_at) - new Date(a.last_reading_at);
@@ -119,36 +120,36 @@ $(document).ready(function() {
 
     moment.updateLocale('en', {
         relativeTime: {
-            future: 'en %s',
-            past: 'fa %s',
+            future: 'in %s',
+            past: 'was %s',
             s: function(number, withoutSuffix, key, isFuture) {
-                return (number > 1) ? number + ' segons' : number + ' segon';
+                return (number > 1) ? number + ' seconds' : number + ' second';
             },
             m: '1 minut',
             mm: function(number, withoutSuffix, key, isFuture) {
-                return (number > 1) ? number + ' minuts' : number + ' minuts';
+                return (number > 1) ? number + ' minutes' : number + ' minute';
             },
-            h: 'una hora',
-            hh: '%d hores',
-            d: 'un dia',
-            dd: '%d dies',
-            M: 'un mes',
-            MM: '%d mesos',
-            y: 'un any',
-            yy: '%d anys'
+            h: 'one hour',
+            hh: '%d hours',
+            d: 'one day',
+            dd: '%d days',
+            M: 'a month',
+            MM: '%d months',
+            y: 'one year',
+            yy: '%d years'
         }
     });
 
     var sentences = {
-        "INTRO": " Kits connectats d'un total de ",
-        "HAS_NOT_PUBLISHED": "Esperant a que publiqui dades...",
-        "LAST_UPDATE": "Última publicació ",
-        "DISCHARGED": ", la bateria està descarregada",
-        "WAS_DISCHARGED": ", la bateria estava descarregada",
-        "CHARGED": ", la bateria està totalment carregada",
-        "WAS_CHARGED": ", la bateria estava totalment carregada",
-        "CHARGING": ", la bateria està al ",
-        "WAS_CHARGING": ", la bateria estava al "
+        "INTRO": " Kits connected from a total of ",
+        "HAS_NOT_PUBLISHED": "Waiting to publish data...",
+        "LAST_UPDATE": "Last publication ",
+        "DISCHARGED": ", battery is fully discharged",
+        "WAS_DISCHARGED": ", battery was lodaded",
+        "CHARGED": ", batery is fully charged",
+        "WAS_CHARGED": ", battery was fully charged",
+        "CHARGING": ", battery is at ",
+        "WAS_CHARGING": ", battery was at "
     };
 
     update();
