@@ -1,7 +1,42 @@
-$(document).ready(function() {
+var dashboard = {
+    settings: {
+        offlineTime: 120
+    },
+    sentences: {
+        "INTRO": " Kits connected from a total of ",
+        "HAS_NOT_PUBLISHED": "Waiting to publish data...",
+        "LAST_UPDATE": "Last publication ",
+        "DISCHARGED": ", battery is fully discharged",
+        "WAS_DISCHARGED": ", battery was lodaded",
+        "CHARGED": ", batery is fully charged",
+        "WAS_CHARGED": ", battery was fully charged",
+        "CHARGING": ", battery is at ",
+        "WAS_CHARGING": ", battery was at "
+    }
+};
 
-    var tag = location.hash.substring(1) || '',
-        offlineTime = 120;
+/*dashboard.tagsSelector = function() {
+    var arr = [
+      {val : '', text: ''},
+      {val : 'Streamr', text: 'Streamr'}
+    ];
+
+    var sel = $('<select>').appendTo('body').change(function(e) {
+        console.log(e.target.value);
+        window.location.hash = e.target.value;
+        dashboard.load(dashboard.autoUpdate);
+    });
+
+    $(arr).each(function() {
+         sel.append($("<option>").attr('value',this.val).text(this.text));
+    });
+}*/
+
+dashboard.load = function (callback) {
+
+    var self = this;
+
+    var tag = location.hash.substring(1) || '';
 
     document.title = 'Smart Citizen @ ' + tag;
 
@@ -14,8 +49,8 @@ $(document).ready(function() {
             $('*[data-device="' + device.device_id + '"]')
                 .data('lastUpdate', device.data.last_reading_at)
                 .data('batteryStatus', {
-                    last: device.readings.bat[1],
-                    prev: device.readings.bat[2]
+                    last: device.readings && device.readings.bat ? device.readings.bat[1] : 0,
+                    prev: device.readings && device.readings.bat ? device.readings.bat[2] : 0
                 })
                 .removeClass('offline')
                 .addClass('online')
@@ -47,115 +82,112 @@ $(document).ready(function() {
                 })
                 .html(device.name + ' <span> de ' + device.owner_username + '</span>').append(
                     $('<div>', {'class': 'status'}) 
-                    .text(sentences['HAS_NOT_PUBLISHED']))
+                    .text(self.sentences['HAS_NOT_PUBLISHED']))
             );
         });
+        callback();
     });
 
-    var update = function () {
+}
 
-        $('.device').each(function(device) {
-            var lastDeviceUpdate = $(this).data('lastUpdate');
+dashboard.update = function () {
 
-            if (lastDeviceUpdate) {
+    var self = this;
 
-                var batteryStatus = $(this).data('batteryStatus');
-                var $status = $(this).find('.status');
+    $('.device').each(function(device) {
+        var lastDeviceUpdate = $(this).data('lastUpdate');
 
-                $status.html(sentences['LAST_UPDATE'] + moment(lastDeviceUpdate).fromNow());
+        if (lastDeviceUpdate) {
 
-                var isOnline = true;
+            var batteryStatus = $(this).data('batteryStatus');
+            var $status = $(this).find('.status');
 
-                if (new Date() - new Date(lastDeviceUpdate) > 2000 * offlineTime) {
-                    isOnline = false;
-                }
+            $status.html(self.sentences['LAST_UPDATE'] + moment(lastDeviceUpdate).fromNow());
 
-                if (batteryStatus && (batteryStatus.last || batteryStatus.last == 0)) {
-                    if (batteryStatus.last == 0) {
-                        if (isOnline) {
-                            $status.append(sentences['DISCHARGED']);
-                        } else {
-                            $status.append(sentences['WAS_DISCHARGED']);
-                        }
-                    } else if (batteryStatus.last >= 100) {
-                        if (isOnline) {
-                            $status.append(sentences['CHARGED']);
-                        } else {
-                            $status.append(sentences['WAS_CHARGED']);
-                        }
+            var isOnline = true;
+
+            if (new Date() - new Date(lastDeviceUpdate) > 2000 * self.settings.offlineTime) {
+                isOnline = false;
+            }
+
+            if (batteryStatus && (batteryStatus.last || batteryStatus.last == 0)) {
+                if (batteryStatus.last == 0) {
+                    if (isOnline) {
+                        $status.append(self.sentences['DISCHARGED']);
                     } else {
-                        if (isOnline) {
-                            $status.append(sentences['CHARGING'] + batteryStatus.last + '%');
-                        } else {
-                            $status.append(sentences['WAS_CHARGING'] + batteryStatus.last + '%');
-                        }
+                        $status.append(self.sentences['WAS_DISCHARGED']);
+                    }
+                } else if (batteryStatus.last >= 100) {
+                    if (isOnline) {
+                        $status.append(self.sentences['CHARGED']);
+                    } else {
+                        $status.append(self.sentences['WAS_CHARGED']);
+                    }
+                } else {
+                    if (isOnline) {
+                        $status.append(self.sentences['CHARGING'] + batteryStatus.last + '%');
+                    } else {
+                        $status.append(self.sentences['WAS_CHARGING'] + batteryStatus.last + '%');
                     }
                 }
-
-                if (isOnline) {
-                    $(this).removeClass('offline').addClass('online');
-                } else {
-                    $(this).removeClass('online').addClass('offline');
-                }
-
             }
-        });
 
-        var online = Math.ceil(($('.online').length / $('.device').length) * 100);
+            if (isOnline) {
+                $(this).removeClass('offline').addClass('online');
+            } else {
+                $(this).removeClass('online').addClass('offline');
+            }
 
-        online = (isNaN(online)) ? '' : ' (' + online + ' %)';
-
-        $('h3').text($('.online').length + sentences['INTRO'] + $('.device').length + ' ' + online);
-
-    }
-
-    $.fn.extend({
-        animateCss: function(animationName) {
-            var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-            this.addClass('animated ' + animationName).one(animationEnd, function() {
-                $(this).removeClass('animated ' + animationName);
-            });
         }
     });
 
-    moment.updateLocale('en', {
-        relativeTime: {
-            future: 'in %s',
-            past: 'was %s',
-            s: function(number, withoutSuffix, key, isFuture) {
-                return (number > 1) ? number + ' seconds' : number + ' second';
-            },
-            m: '1 minut',
-            mm: function(number, withoutSuffix, key, isFuture) {
-                return (number > 1) ? number + ' minutes' : number + ' minute';
-            },
-            h: 'one hour',
-            hh: '%d hours',
-            d: 'one day',
-            dd: '%d days',
-            M: 'a month',
-            MM: '%d months',
-            y: 'one year',
-            yy: '%d years'
-        }
-    });
+    var online = Math.ceil(($('.online').length / $('.device').length) * 100);
 
-    var sentences = {
-        "INTRO": " Kits connected from a total of ",
-        "HAS_NOT_PUBLISHED": "Waiting to publish data...",
-        "LAST_UPDATE": "Last publication ",
-        "DISCHARGED": ", battery is fully discharged",
-        "WAS_DISCHARGED": ", battery was lodaded",
-        "CHARGED": ", batery is fully charged",
-        "WAS_CHARGED": ", battery was fully charged",
-        "CHARGING": ", battery is at ",
-        "WAS_CHARGING": ", battery was at "
-    };
+    online = (isNaN(online)) ? '' : ' (' + online + ' %)';
 
-    update();
+    $('h3').text($('.online').length + self.sentences['INTRO'] + $('.device').length + ' ' + online);
+}
+
+dashboard.autoUpdate = function () {
+
+    dashboard.update();
 
     setInterval(function() {
-        update();
+        dashboard.update();
     }, 500);
+}
 
+$(document).ready(function() {
+    dashboard.load(dashboard.autoUpdate);
+});
+
+$.fn.extend({
+    animateCss: function(animationName) {
+        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+        this.addClass('animated ' + animationName).one(animationEnd, function() {
+            $(this).removeClass('animated ' + animationName);
+        });
+    }
+});
+
+moment.updateLocale('en', {
+    relativeTime: {
+        future: 'in %s',
+        past: 'was %s',
+        s: function(number, withoutSuffix, key, isFuture) {
+            return (number > 1) ? number + ' seconds' : number + ' second';
+        },
+        m: '1 minute',
+        mm: function(number, withoutSuffix, key, isFuture) {
+            return (number > 1) ? number + ' minutes' : number + ' minute';
+        },
+        h: 'one hour',
+        hh: '%d hours',
+        d: 'one day',
+        dd: '%d days',
+        M: 'a month',
+        MM: '%d months',
+        y: 'one year',
+        yy: '%d years'
+    }
 });
