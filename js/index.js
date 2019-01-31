@@ -8,7 +8,7 @@ var dashboard = {
         "LAST_UPDATE": "Last publication ",
         "DISCHARGED": ", battery is fully discharged",
         "WAS_DISCHARGED": ", battery was lodaded",
-        "CHARGED": ", batery is fully charged",
+        "CHARGED": ", battery is fully charged",
         "WAS_CHARGED": ", battery was fully charged",
         "CHARGING": ", battery is at ",
         "WAS_CHARGING": ", battery was at "
@@ -45,12 +45,17 @@ dashboard.load = function (callback) {
     }).html('<div class="loader"><div class = "l l-1"></div><div class="l l-2"></div><div class="l l-3"></div></div>'));
 
     io.connect('wss://ws.smartcitizen.me').on('data-received', function(device) {
-        if (tag == '' || device.data.user_tags.includes(tag)) {
-            $('*[data-device="' + device.device_id + '"]')
-                .data('lastUpdate', device.data.last_reading_at)
+        if (tag == '' || device.user_tags.includes(tag)) {
+
+            var batSensor = device.data.sensors.filter(function(sensor) {
+                return sensor.name.toLowerCase().includes("battery");
+            })[0];
+
+            $('*[data-device="' + device.id + '"]')
+                .data('lastUpdate', device.last_reading_at)
                 .data('batteryStatus', {
-                    last: device.readings && device.readings.bat ? device.readings.bat[1] : 0,
-                    prev: device.readings && device.readings.bat ? device.readings.bat[2] : 0
+                    last: batSensor && batSensor.value ? batSensor.value : null,
+                    prev: batSensor && batSensor.prev_value ? batSensor.prev_value : null,
                 })
                 .removeClass('offline')
                 .addClass('online')
