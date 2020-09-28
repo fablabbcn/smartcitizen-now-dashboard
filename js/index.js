@@ -1,6 +1,6 @@
 var dashboard = {
     settings: {
-        offlineTime: 120
+        offlineTime: 900
     },
     sentences: {
         "INTRO": " Kits connected from a total of ",
@@ -111,7 +111,7 @@ dashboard.update = function () {
 
             var isOnline = true;
 
-            if (new Date() - new Date(lastDeviceUpdate) > 2000 * self.settings.offlineTime) {
+            if (new Date() - new Date(lastDeviceUpdate) > 1000 * self.settings.offlineTime) {
                 isOnline = false;
             }
 
