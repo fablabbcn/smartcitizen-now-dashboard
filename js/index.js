@@ -1,6 +1,6 @@
 var dashboard = {
     settings: {
-        offlineTime: 900
+        offlineTime: 1800
     },
     sentences: {
         "INTRO": " Kits connected from a total of ",
