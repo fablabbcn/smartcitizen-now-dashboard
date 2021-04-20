@@ -11,7 +11,8 @@ var dashboard = {
         "CHARGED": ", battery is fully charged",
         "WAS_CHARGED": ", battery was fully charged",
         "CHARGING": ", battery is at ",
-        "WAS_CHARGING": ", battery was at "
+        "WAS_CHARGING": ", battery was at ",
+        "NO_BATTERY": ", plugged, no battery"
     }
 };
 
@@ -79,13 +80,10 @@ dashboard.load = function (callback) {
                     'data-device': device.id
                 })
                 .data('lastUpdate', device.last_reading_at)
-                // .data('batteryStatus', {
-                //     last: null,
-                // })
                 .click(function() {
                     window.open('https://smartcitizen.me/kits/' + device.id, '_blank');
                 })
-                .html(device.name + ' <span> de ' + device.owner_username + '</span>').append(
+                .html(newLineString(device.name, 15) + ' <span> by ' + device.owner_username + '</span>').append(
                     $('<div>', {'class': 'status'}) 
                     .text(self.sentences['HAS_NOT_PUBLISHED']))
             );
@@ -116,7 +114,9 @@ dashboard.update = function () {
             }
 
             if (batteryStatus && (batteryStatus.last || batteryStatus.last == 0)) {
-                if (batteryStatus.last == 0) {
+                if (batteryStatus.last == -1) {
+                    $status.append(self.sentences['NO_BATTERY']);
+                } else if (batteryStatus.last == 0) {
                     if (isOnline) {
                         $status.append(self.sentences['DISCHARGED']);
                     } else {
@@ -174,6 +174,20 @@ $.fn.extend({
         });
     }
 });
+
+function newLineString(fullStr, strLen, separator) {
+    if (!fullStr || fullStr.length <= strLen) return fullStr;
+
+    separator = separator || '...';
+
+    var charsToShow = fullStr.length,
+        frontChars = strLen,
+        backChars = Math.floor(charsToShow - strLen);
+
+    return fullStr.substr(0, frontChars) +
+           '\n' +
+           fullStr.substr(fullStr.length - backChars);
+};
 
 moment.updateLocale('en', {
     relativeTime: {
